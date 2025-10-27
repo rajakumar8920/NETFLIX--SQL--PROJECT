@@ -1,6 +1,6 @@
 # Netflix Movies and TV Shows Data Analysis using SQL
 
-![](https://github.com/najirh/netflix_sql_project/blob/main/logo.png)
+![](https://images.ctfassets.net/y2ske730sjqp/1aONibCke6niZhgPxuiilC/2c401b05a07288746ddf3bd3943fbc76/BrandAssets_Logos_01-Wordmark.jpg?w=940)
 
 ## Overview
 This project involves a comprehensive analysis of Netflix's movies and TV shows data using SQL. The goal is to extract valuable insights and answer various business questions based on the dataset. The following README provides a detailed account of the project's objectives, business problems, solutions, findings, and conclusions.
@@ -131,16 +131,14 @@ return top 5 year with highest avg content release!
 
 ```sql
 SELECT 
-    country,
-    release_year,
-    COUNT(show_id) AS total_release,
-    ROUND(
-        COUNT(show_id)::numeric /
-        (SELECT COUNT(show_id) FROM netflix WHERE country = 'India')::numeric * 100, 2
-    ) AS avg_release
+	EXTRACT(YEAR FROM TO_DATE(date_added, 'Month DD, YYYY')) AS year,
+	COUNT(*) AS yearly_contents,
+	ROUND(COUNT(*)::NUMERIC/(SELECT COUNT(*) FROM netflix 
+						WHERE country ILIKE '%India%') * 100,2) AS avg_contents
 FROM netflix
-WHERE country = 'India'
-GROUP BY country, release_yearORDER BY avg_release DESC
+WHERE country ILIKE '%India%'
+GROUP BY 1
+ORDER BY 3 DESC
 LIMIT 5;
 ```
 ### 11. List All Movies that are Documentaries
