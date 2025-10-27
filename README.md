@@ -89,10 +89,11 @@ LIMIT 5;
 ### 5. Identify the Longest Movie
 
 ```sql
-SELECT 
-    *
-FROM netflixWHERE type = 'Movie'
-ORDER BY SPLIT_PART(duration, ' ', 1)::INT DESC;
+SELECT * FROM netflix
+WHERE 
+	duration = (SELECT MAX(duration) FROM netflix)
+	AND 
+	type= 'Movie';
 ```
 ### 6. Find Content Added in the Last 5 Years
 
@@ -122,7 +123,8 @@ SELECT
 	UNNEST(STRING_TO_ARRAY(listed_in,',')) AS listed_in, 
 	COUNT(*) AS no_of_contents
 FROM netflix
-GROUP BY 1;
+GROUP BY 1
+ORDER BY 2 DESC;
 ```
 ### 10.Find each year and the average numbers of content release in India on netflix. 
 return top 5 year with highest avg content release!
@@ -141,15 +143,10 @@ WHERE country = 'India'
 GROUP BY country, release_yearORDER BY avg_release DESC
 LIMIT 5;
 ```
-
-**Objective:** Calculate and rank years by the average number of content releases by India.
-
 ### 11. List All Movies that are Documentaries
-
 ```sql
-SELECT * 
-FROM netflix
-WHERE listed_in LIKE '%Documentaries';
+SELECT * FROM netflix
+WHERE listed_in ILIKE '%documentaries%';
 ```
 ### 12. Find All Content Without a Director
 ```sql
@@ -159,15 +156,13 @@ WHERE director IS NULL;
 ### 13. Find How Many Movies Actor 'Salman Khan' Appeared in the Last 10 Years
 
 ```sql
-SELECT * 
-FROM netflix
-WHERE casts LIKE '%Salman Khan%'
-  AND release_year > EXTRACT(YEAR FROM CURRENT_DATE) - 10;
+SELECT * FROM netflix
+WHERE 
+	casts ILIKE '%Salman Khan%'
+	AND
+	release_year > (EXTRACT (YEAR FROM CURRENT_DATE) - 10);
 ```
-**Objective:** Count the number of movies featuring 'Salman Khan' in the last 10 years.
-
 ### 14. Find the Top 10 Actors Who Have Appeared in the Highest Number of Movies Produced in India
-
 ```sql
 SELECT 
     UNNEST(STRING_TO_ARRAY(casts, ',')) AS actor,
@@ -178,26 +173,22 @@ GROUP BY actor
 ORDER BY COUNT(*) DESC
 LIMIT 10;
 ```
-
-**Objective:** Identify the top 10 actors with the most appearances in Indian-produced movies.
-
 ### 15. Categorize Content Based on the Presence of 'Kill' and 'Violence' Keywords
 ```sql
-SELECT 
-    category,
-    COUNT(*) AS content_count
-FROM (
-    SELECT 
-        CASE 
-            WHEN description ILIKE '%kill%' OR description ILIKE '%violence%' THEN 'Bad'
-            ELSE 'Good'
-        END AS category
-    FROM netflix
-) AS categorized_content
-GROUP BY category;
+WITH category_table AS (
+	SELECT 
+		*,
+		CASE 
+			WHEN description ILIKE '%kill%' OR
+				description ILIKE '%violence%' THEN 'Bad Content'
+			ELSE 'Good Content'
+		END category
+	FROM netflix
+)
+SELECT category, COUNT(*) AS total_contents
+FROM category_table
+GROUP  BY 1;
 ```
-**Objective:** Categorize content as 'Bad' if it contains 'kill' or 'violence' and 'Good' otherwise. Count the number of items in each category.
-
 ## Findings and Conclusion
 
 - **Content Distribution:** The dataset contains a diverse range of movies and TV shows with varying ratings and genres.
@@ -206,36 +197,9 @@ GROUP BY category;
 - **Content Categorization:** Categorizing content based on specific keywords helps in understanding the nature of content available on Netflix.
 
 This analysis provides a comprehensive view of Netflix's content and can help inform content strategy and decision-making.
-## Author - Zero Analyst
 
-This project is part of my portfolio, showcasing the SQL skills essential for data analyst roles. If you have any questions, feedback, or would like to collaborate, feel free to get in touch!
+This project is part of my portfolio, showcasing the SQL skills essential for data analyst roles.
 
-### Stay Updated and Join the Community
-
-For more content on SQL, data analysis, and other data-related topics, make sure to follow me on social media and join our community:
-
-- **YouTube**: [Subscribe to my channel for tutorials and insights](https://www.youtube.com/@zero_analyst)
-- **Instagram**: [Follow me for daily tips and updates](https://www.instagram.com/zero_analyst/)
-- **LinkedIn**: [Connect with me professionally](https://www.linkedin.com/in/najirr)
-- **Discord**: [Join our community to learn and grow together](https://discord.gg/36h5f2Z5PK)
-
-Thank you for your support, and I look forward to connecting with you!
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Thank you for exploring this project! Feedback and suggestions for improvement are always welcome.
 
 
